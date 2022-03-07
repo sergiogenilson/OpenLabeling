@@ -15,13 +15,13 @@ import xml.etree.cElementTree as ET
 
 DELAY = 20 # keyboard delay (in milliseconds)
 WITH_QT = False
-try:
-    cv2.namedWindow('Test')
-    cv2.displayOverlay('Test', 'Test QT', 500)
-    WITH_QT = True
-except cv2.error:
-    print('-> Please ignore this error message\n')
-cv2.destroyAllWindows()
+# try:
+#     cv2.namedWindow('Test')
+#     cv2.displayOverlay('Test', 'Test QT', 500)
+#     WITH_QT = True
+# except cv2.error:
+#     print('-> Please ignore this error message\n')
+# cv2.destroyAllWindows()
 
 
 parser = argparse.ArgumentParser(description='Open-source image labeling tool')
@@ -38,7 +38,7 @@ tracker_types = ['CSRT', 'KCF','MOSSE', 'MIL', 'BOOSTING', 'MEDIANFLOW', 'TLD', 
         MOSSE -> Less accurate than KCF but very fast (minimum OpenCV 3.4.1)
 '''
 parser.add_argument('--tracker', default='KCF', type=str, help="tracker_type being used: ['CSRT', 'KCF','MOSSE', 'MIL', 'BOOSTING', 'MEDIANFLOW', 'TLD', 'GOTURN', 'DASIAMRPN']")
-parser.add_argument('-n', '--n_frames', default='200', type=int, help='number of frames to track object for')
+parser.add_argument('-n', '--n_frames', default='10', type=int, help='number of frames to track object for')
 args = parser.parse_args()
 
 class_index = 0
