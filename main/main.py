@@ -68,6 +68,7 @@ prev_was_double_click = False
 is_bbox_selected = False
 selected_bbox = -1
 LINE_THICKNESS = args.thickness
+iterative_line_thickness = LINE_THICKNESS
 
 mouse_x = 0
 mouse_y = 0
@@ -104,7 +105,7 @@ class dragBBox:
     '''
 
     # Size of resizing anchors (depends on LINE_THICKNESS)
-    sRA = LINE_THICKNESS * 2
+    sRA = iterative_line_thickness * 2
 
     # Object being dragged
     selected_object = None
@@ -234,8 +235,9 @@ def increase_index(current_index, last_index):
 
 
 def draw_line(img, x, y, height, width, color):
-    cv2.line(img, (x, 0), (x, height), color, LINE_THICKNESS)
-    cv2.line(img, (0, y), (width, y), color, LINE_THICKNESS)
+    # line_thick = 
+    cv2.line(img, (x, 0), (x, height), color, iterative_line_thickness)
+    cv2.line(img, (0, y), (width, y), color, iterative_line_thickness)
 
 
 def yolo_format(class_index, point_1, point_2, width, height):
@@ -399,13 +401,13 @@ def draw_bboxes_from_file(tmp_img, annotation_paths, width, height):
                 img_objects.append([class_index, xmin, ymin, xmax, ymax])
                 color = class_rgb[class_index].tolist()
                 # draw bbox
-                cv2.rectangle(tmp_img, (xmin, ymin), (xmax, ymax), color, LINE_THICKNESS)
+                cv2.rectangle(tmp_img, (xmin, ymin), (xmax, ymax), color, iterative_line_thickness)
                 # draw resizing anchors if the object is selected
                 if is_bbox_selected:
                     if idx == selected_bbox:
                         tmp_img = draw_bbox_anchors(tmp_img, xmin, ymin, xmax, ymax, color)
                 font = cv2.FONT_HERSHEY_SIMPLEX
-                cv2.putText(tmp_img, class_name, (xmin, ymin - 5), font, 0.6, color, LINE_THICKNESS, cv2.LINE_AA)
+                cv2.putText(tmp_img, class_name, (xmin, ymin - 5), font, 0.5 * iterative_line_thickness, color, iterative_line_thickness, cv2.LINE_AA)
         else:
             # Draw from YOLO
             with open(ann_path) as fp:
@@ -416,13 +418,13 @@ def draw_bboxes_from_file(tmp_img, annotation_paths, width, height):
                     img_objects.append([class_index, xmin, ymin, xmax, ymax])
                     color = class_rgb[class_index].tolist()
                     # draw bbox
-                    cv2.rectangle(tmp_img, (xmin, ymin), (xmax, ymax), color, LINE_THICKNESS)
+                    cv2.rectangle(tmp_img, (xmin, ymin), (xmax, ymax), color, iterative_line_thickness)
                     # draw resizing anchors if the object is selected
                     if is_bbox_selected:
                         if idx == selected_bbox:
                             tmp_img = draw_bbox_anchors(tmp_img, xmin, ymin, xmax, ymax, color)
                     font = cv2.FONT_HERSHEY_SIMPLEX
-                    cv2.putText(tmp_img, class_name, (xmin, ymin - 5), font, 0.6, color, LINE_THICKNESS, cv2.LINE_AA)
+                    cv2.putText(tmp_img, class_name, (xmin, ymin - 5), font, 0.5 * iterative_line_thickness, color, iterative_line_thickness, cv2.LINE_AA)
     return tmp_img
 
 
@@ -944,7 +946,7 @@ class LabelTracker():
                 ymax = ymin + h
                 obj = [class_index, xmin, ymin, xmax, ymax]
                 frame_data_dict = json_file_add_object(frame_data_dict, frame_path, anchor_id, pred_counter, obj)
-                cv2.rectangle(next_image, (xmin, ymin), (xmax, ymax), color, LINE_THICKNESS)
+                cv2.rectangle(next_image, (xmin, ymin), (xmax, ymax), color, iterative_line_thickness)
                 # save prediction
                 annotation_paths = get_annotation_paths(frame_path, annotation_formats)
                 save_bounding_box(annotation_paths, class_index, (xmin, ymin), (xmax, ymax), self.img_w, self.img_h)
@@ -1079,15 +1081,17 @@ if __name__ == '__main__':
             # draw edges
             tmp_img = draw_edges(tmp_img)
         # draw vertical and horizontal guide lines
+
+        iterative_line_thickness = LINE_THICKNESS * (1 + int((width + height) / 2000))
         draw_line(tmp_img, mouse_x, mouse_y, height, width, color)
         # write selected class
         class_name = CLASS_LIST[class_index]
         font = cv2.FONT_HERSHEY_SIMPLEX
-        font_scale = 0.6
+        font_scale = 0.5 * iterative_line_thickness
         margin = 3
-        text_width, text_height = cv2.getTextSize(class_name, font, font_scale, LINE_THICKNESS)[0]
-        tmp_img = cv2.rectangle(tmp_img, (mouse_x + LINE_THICKNESS, mouse_y - LINE_THICKNESS), (mouse_x + text_width + margin, mouse_y - text_height - margin), complement_bgr(color), -1)
-        tmp_img = cv2.putText(tmp_img, class_name, (mouse_x + margin, mouse_y - margin), font, font_scale, color, LINE_THICKNESS, cv2.LINE_AA)
+        text_width, text_height = cv2.getTextSize(class_name, font, font_scale, iterative_line_thickness)[0]
+        tmp_img = cv2.rectangle(tmp_img, (mouse_x + iterative_line_thickness, mouse_y - iterative_line_thickness), (mouse_x + text_width + margin, mouse_y - text_height - margin), complement_bgr(color), -1)
+        tmp_img = cv2.putText(tmp_img, class_name, (mouse_x + margin, mouse_y - margin), font, font_scale, color, iterative_line_thickness, cv2.LINE_AA)
         # get annotation paths
         img_path = IMAGE_PATH_LIST[img_index]
         annotation_paths = get_annotation_paths(img_path, annotation_formats)
@@ -1101,7 +1105,7 @@ if __name__ == '__main__':
         # if first click
         if point_1[0] != -1:
             # draw partial bbox
-            cv2.rectangle(tmp_img, point_1, (mouse_x, mouse_y), color, LINE_THICKNESS)
+            cv2.rectangle(tmp_img, point_1, (mouse_x, mouse_y), color, iterative_line_thickness)
             # if second click
             if point_2[0] != -1:
                 # save the bounding box
