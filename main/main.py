@@ -284,8 +284,14 @@ def write_xml(xml_str, xml_path):
 
 def append_bb(ann_path, line, extension):
     if '.txt' in extension:
-        with open(ann_path, 'a') as myfile:
-            myfile.write(line + '\n') # append line
+        with open(ann_path, 'r') as rfile:
+            with open(ann_path, 'a') as myfile:
+                lines = rfile.readlines()
+                print(lines)
+                if len(lines) == 0 or (len(lines) > 0 and '\n' in lines[-1]):
+                    myfile.write(line + '\n') # append line
+                else:
+                    myfile.write('\n' + line + '\n') # append line
     elif '.xml' in extension:
         class_name, xmin, ymin, xmax, ymax = line
 
@@ -1082,7 +1088,7 @@ if __name__ == '__main__':
             tmp_img = draw_edges(tmp_img)
         # draw vertical and horizontal guide lines
 
-        iterative_line_thickness = LINE_THICKNESS * (1 + int((width + height) / 2000))
+        iterative_line_thickness = LINE_THICKNESS * (1 + int((width + height) / 5000))
         draw_line(tmp_img, mouse_x, mouse_y, height, width, color)
         # write selected class
         class_name = CLASS_LIST[class_index]
